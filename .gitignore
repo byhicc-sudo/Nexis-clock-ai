@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+*.pem
+*.key
+__pycache__/
+.pytest_cache/
+*.pyc
+.venv/
+local.properties
+.gradle/
+**/build/
+.idea/
+*.apk
+*.aab
