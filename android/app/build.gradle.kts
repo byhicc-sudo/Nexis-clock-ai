@@ -6,11 +6,11 @@ android {
     namespace = "com.nexis.ceo"
     compileSdk = 35
     defaultConfig {
-        applicationId = "com.nexis.ceo"
+        applicationId = "com.nexis.ceo.full"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1.0-lab"
+        versionCode = 100
+        versionName = "1.0.0"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
