@@ -7,11 +7,11 @@ on:
       - 'android/**'
       - '.github/workflows/android-apk.yml'
 permissions:
-  contents: read
+  contents: write
 jobs:
   build-android:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -20,21 +20,50 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Android SDK
+      - name: Android SDK setup
         uses: android-actions/setup-android@v3
-      - name: Android platform
+      - name: Install Android platform
         run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
       - name: Gradle 8.9
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Build debug APK
-        working-directory: android
-        run: gradle --no-daemon :app:assembleDebug
-      - name: Upload debug APK
+      - name: Compile debug APK
+        id: build
+        shell: bash
+        run: |
+          set -o pipefail
+          cd android
+          gradle --no-daemon --stacktrace :app:assembleDebug 2>&1 | tee ../android-build.log
+      - name: Upload APK artifact
+        if: success()
+        id: artifact
         uses: actions/upload-artifact@v4
         with:
           name: NEXIS-CEO-AI-v0.1-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
+      - name: Publish compact build status to repository
+        if: always()
+        continue-on-error: true
+        shell: bash
+        run: |
+          {
+            echo "# NEXIS Android build status"
+            echo
+            echo "- Run ID: ${{ github.run_id }}"
+            echo "- Build result: ${{ steps.build.outcome }}"
+            echo "- Artifact upload result: ${{ steps.artifact.outcome }}"
+            echo "- Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo
+            echo "## Last 65 build output lines"
+            echo '~~~'
+            if [ -f android-build.log ]; then tail -n 65 android-build.log; else echo 'No build log: failure occurred before the compile step.'; fi
+            echo '~~~'
+          } > BUILD_STATUS.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add BUILD_STATUS.md
+          git commit -m "ci: record latest Android APK build result [skip ci]" || true
+          git push origin HEAD:main
