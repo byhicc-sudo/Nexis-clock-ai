@@ -104,6 +104,10 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
             setOnClickListener { action() }
             minHeight = dip(43)
         }
+    // Overload for Kotlin trailing-lambda UI callbacks.
+    private fun button(title: String, secondary: Boolean = false, action: () -> Unit): Button =
+        button(title, action, secondary)
+
     private fun section(title: String): LinearLayout {
         val c=LinearLayout(this).apply {
             orientation=LinearLayout.VERTICAL
@@ -147,7 +151,7 @@ class MainActivity : Activity(), TextToSpeech.OnInitListener {
         }
         strip.addView(tabs)
         vertical.addView(strip)
-        val scroll=ScrollView(this).apply {fillViewport=true}
+        val scroll=ScrollView(this).apply {isFillViewport=true}
         content=LinearLayout(this).apply {
             orientation=LinearLayout.VERTICAL
             setPadding(dip(13),dip(12),dip(13),dip(34))
