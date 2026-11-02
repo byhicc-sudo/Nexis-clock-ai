@@ -1,0 +1,17 @@
+name: NEXIS RX LAB34 correctness
+on:
+  push:
+    paths:
+      - 'research/randomx/LAB34/**'
+      - '.github/workflows/nexis-rx-lab34.yml'
+  workflow_dispatch:
+jobs:
+  lab34:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile with sanitizers
+        run: g++ -std=c++17 -O1 -g -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer research/randomx/LAB34/lab34.cpp -o /tmp/nexis-rx-lab34
+      - name: Compare original and simplified execution
+        run: /tmp/nexis-rx-lab34
