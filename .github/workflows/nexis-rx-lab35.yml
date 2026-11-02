@@ -1,0 +1,25 @@
+name: NEXIS RX LAB35 official RandomX reference
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/nexis-rx-lab35.yml'
+jobs:
+  reference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout official RandomX
+        uses: actions/checkout@v4
+        with:
+          repository: tevador/RandomX
+          ref: master
+          path: RandomX
+      - name: Configure
+        run: cmake -S RandomX -B RandomX/build -DCMAKE_BUILD_TYPE=Release -DARCH=native
+      - name: Compile
+        run: cmake --build RandomX/build --parallel 2
+      - name: Run official tests
+        run: |
+          find RandomX/build -maxdepth 3 -type f -executable -print
+          if [ -x RandomX/build/randomx-tests ]; then RandomX/build/randomx-tests; elif [ -x RandomX/build/tests ]; then RandomX/build/tests; else echo "No known test executable found"; exit 1; fi
